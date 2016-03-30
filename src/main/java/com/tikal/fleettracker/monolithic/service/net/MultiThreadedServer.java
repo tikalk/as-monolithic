@@ -1,8 +1,13 @@
 package com.tikal.fleettracker.monolithic.service.net;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -22,6 +27,8 @@ public class MultiThreadedServer {
 	private GPSReadingService gpsReadingService;
 	private ServerSocket serverSocket;
 	private boolean isStopped;
+	
+	private final Map<String, WorkerRunnable> workers = new HashMap<>(); 
 
 	
 	@PostConstruct
@@ -42,9 +49,25 @@ public class MultiThreadedServer {
 				}
 				throw new RuntimeException("Error accepting client connection", e);
 			}
-			new Thread(new WorkerRunnable(clientSocket,gpsReadingService)).start();
+			handleConnection(clientSocket);
 		}
 		System.out.println("Server Stopped.");
+	}
+
+	private void handleConnection(final Socket clientSocket) {
+		try {
+			final BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			final String line = in.readLine();
+			final String imei = line.split(",")[1];
+			WorkerRunnable workerRunnable = workers.get(imei);
+			if(workerRunnable==null){
+				workerRunnable = new WorkerRunnable(clientSocket,gpsReadingService);
+				workers.put(imei,workerRunnable);
+				new Thread(workerRunnable).start();
+			}
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private synchronized boolean isStopped() {
