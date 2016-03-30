@@ -5,19 +5,16 @@ import java.util.Date;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.tikal.fleettracker.monolithic.domain.entity.Device;
 import com.tikal.fleettracker.monolithic.domain.entity.GPSReading;
 import com.tikal.fleettracker.monolithic.repository.jpa.DeviceRepository;
 import com.tikal.fleettracker.monolithic.repository.jpa.GPSReadingRepository;
 
-@RestController
+@Service
 @Transactional
-@RequestMapping("/")
 public class GPSReadingService {
 	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GPSReadingService.class);
 
@@ -33,7 +30,6 @@ public class GPSReadingService {
 	
 	
 
-	@RequestMapping(value = "/gps",method = RequestMethod.POST)
 	public void saveGPSReading(@RequestBody final String gpsPayload){
 		final GPSReading gpsReading = parse(gpsPayload);
 		final Device device = deviceRepository.findDeviceByImei(gpsReading.getImei());
