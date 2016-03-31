@@ -1,5 +1,7 @@
 package com.tikal.fleettracker.monolithic.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.transaction.Transactional;
@@ -28,6 +30,8 @@ public class GPSReadingService {
 	@Autowired
 	private GPSAnalyzer gpsAnalyzer;
 	
+	private final SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmss");
+	
 	
 
 	public void saveGPSReading(@RequestBody final String gpsPayload){
@@ -45,20 +49,23 @@ public class GPSReadingService {
 
 
 
-	private GPSReading parse(final String gpsPayload) {
-		final String[] csvValues = gpsPayload.split(",");
-		final GPSReading gps = new GPSReading();
-//		gps.put("_id", csvValues[csvValues.length-1]);
-		gps.setReceptionTime(new Date(Long.valueOf(csvValues[csvValues.length-1])));
-		gps.setImei(csvValues[1]);
-		gps.setLat(Float.valueOf(csvValues[4]));
-		gps.setLon(Float.valueOf(csvValues[5]));
-		gps.setReadingTime(new Date(Long.valueOf(csvValues[6])));
-		gps.setSpeed(Float.valueOf(csvValues[10]));
-		gps.setHeading(Float.valueOf(csvValues[11]));
-		gps.setDistance(Float.valueOf(csvValues[14]));
-		
-		return gps;
+	private GPSReading parse(final String gpsPayload) {		
+		try {
+			final String[] csvValues = gpsPayload.split(",");
+			final GPSReading gps = new GPSReading();
+			gps.setReceptionTime(new Date());
+			gps.setImei(csvValues[1]);
+			gps.setLat(Float.valueOf(csvValues[4]));
+			gps.setLon(Float.valueOf(csvValues[5]));
+			gps.setReadingTime(df.parse((csvValues[6])));
+			gps.setSpeed(Float.valueOf(csvValues[10]));
+			gps.setHeading(Float.valueOf(csvValues[11]));
+			gps.setDistance(Float.valueOf(csvValues[14]));
+			
+			return gps;
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

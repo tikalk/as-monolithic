@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -21,9 +23,11 @@ public class GPSReading {
 	private Integer id;
 
 	@NotNull
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date receptionTime;
 
 	@NotNull
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date readingTime;
 
 	@NotNull
