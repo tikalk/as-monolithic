@@ -31,4 +31,10 @@ public class WorkerRunnable implements Runnable {
 			logger.error("Failed to apply run",e);
 		}
 	}
+
+
+	public void stopPreviousRunning() throws IOException {
+		clientSocket.close();
+		
+	}
 }

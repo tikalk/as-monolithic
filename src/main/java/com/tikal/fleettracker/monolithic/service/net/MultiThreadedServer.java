@@ -57,15 +57,18 @@ public class MultiThreadedServer {
 
 	private void handleConnection(final Socket clientSocket) {
 		try {
+			logger.info("New Connection...");
 			final BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			final String line = in.readLine();
 			final String imei = line.split(",")[1];
 			WorkerRunnable workerRunnable = workers.get(imei);
-			if(workerRunnable==null){
-				workerRunnable = new WorkerRunnable(clientSocket,gpsReadingService);
-				workers.put(imei,workerRunnable);
-				new Thread(workerRunnable).start();
+			if(workerRunnable!=null){
+				logger.info("Close Previous Connection...");
+				workerRunnable.stopPreviousRunning();
 			}
+			workerRunnable = new WorkerRunnable(clientSocket,gpsReadingService);
+			workers.put(imei,workerRunnable);
+			new Thread(workerRunnable).start();
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
