@@ -19,6 +19,8 @@ import com.tikal.fleettracker.monolithic.service.GPSReadingService;
 
 @Component
 public class MultiThreadedServer {
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MultiThreadedServer.class);
+
 
 	@Value("${serverPort:4100}")
 	private int serverPort;
@@ -39,19 +41,18 @@ public class MultiThreadedServer {
 	public void run() {
 		openServerSocket();
 		while (!isStopped()) {
-			Socket clientSocket = null;
 			try {
-				clientSocket = this.serverSocket.accept();
+				final Socket clientSocket = this.serverSocket.accept();
+				handleConnection(clientSocket);
 			} catch (final IOException e) {
 				if (isStopped()) {
-					System.out.println("Server Stopped.");
+					logger.warn("Server Stopped.");
 					return;
 				}
 				throw new RuntimeException("Error accepting client connection", e);
-			}
-			handleConnection(clientSocket);
+			}			
 		}
-		System.out.println("Server Stopped.");
+		logger.warn("Server Stopped.");
 	}
 
 	private void handleConnection(final Socket clientSocket) {
@@ -87,7 +88,7 @@ public class MultiThreadedServer {
 		try {
 			this.serverSocket = new ServerSocket(this.serverPort);
 		} catch (final IOException e) {
-			throw new RuntimeException("Cannot open port 8080", e);
+			throw new RuntimeException("Cannot open port", e);
 		}
 	}
 
